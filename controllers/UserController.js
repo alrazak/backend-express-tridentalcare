@@ -5,7 +5,7 @@ const express = require('express');
 const prisma = require('../prisma/client');
 
 //import validationResult from express-validator
-const { validationResult } = require('express-validator');
+const { validationResult, body } = require('express-validator');
 
 //import bcrypt
 const bcrypt = require('bcryptjs');
@@ -121,5 +121,57 @@ const findUsersById = async (req, res) => {
     }
 };
 
+//function updateUser
+const updateUser = async (req, res) => {
 
-module.exports = { findUsers, createUser, findUsersById };
+    //get ID from params
+    const { id } = req.params;
+
+    //periksa hasil validasi
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+
+        //jika ada error, kembalikan error ke pengguna
+        return res.status(422).json({
+            succes: false,
+            message:'Validation error',
+            errors: errors.array(),
+        });
+    }
+    
+    //hash password
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    try {
+
+        //update user
+        const user = await prisma.user.update({
+            where: {
+                id: Number(id),
+            },
+            data: {
+                name: req.body.name,
+                email: req.body.email,
+                password: hashedPassword,
+            },
+        });
+
+        //send response
+        res.status(200).send({
+            succes: true,
+            message: 'User update succesfully',
+            data: user,
+        });
+
+    } catch (error) {
+        res.status(500).send({
+            succes: false,
+            message: 'Internal server error',
+        });
+    }
+
+};
+
+
+module.exports = { findUsers, createUser, findUsersById, updateUser };
