@@ -35,7 +35,7 @@ router.get('/admin/users', verifyToken, userController.findUsers);
 router.post('/admin/users', verifyToken, validateUser, userController.createUser);
 
 //define route for user by id
-router.get('/admin/users/:id', verifyToken, userController.findUserById);
+router.get('/admin/users/:id', verifyToken, userController.findUsersById);
 
 //define route for user update
 router.put('/admin/users/:id', verifyToken, validateUser, userController.updateUser);
